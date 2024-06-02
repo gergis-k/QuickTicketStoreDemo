@@ -1,0 +1,105 @@
+﻿@page
+@using Microsoft.AspNetCore.Authentication
+@model LoggedInDevicesModel
+@{
+    ViewData["Title"] = "Logged-in Devices";
+    ViewData["ActivePage"] = ManageNavPages.LoggedInDevices;
+}
+
+<h3>@ViewData["Title"]</h3>
+
+<div class="row">
+    <div class="col-md-6">
+    </div>
+
+    @if (Model.Tickets.Count > 0)
+    {
+        <ul class="list-group list-group-flush">
+
+            @foreach (var ticket in Model.Tickets)
+            {
+
+                if (ticket != null)
+                {
+                    <div class="card">
+                        @if (!string.IsNullOrEmpty(ticket.OperatingSystem))
+                        {
+                            <div class="card-header">
+                                @ticket.OperatingSystem
+                            </div>
+                        }
+                        <div class="card-body">
+
+                            @if (!string.IsNullOrEmpty(ticket.UserAgentFamily) && !string.IsNullOrEmpty(ticket.UserAgentVersion))
+                            {
+                                <h5 class="card-title h6">
+                                    @ticket.UserAgentFamily &bull; @ticket.UserAgentVersion
+                                </h5>
+                            }
+
+                            @if (!string.IsNullOrEmpty(ticket.RemoteIpAddress))
+                            {
+                                <h6 class="card-subtitle mb-2 text-body-secondary">IP Address: @ticket.RemoteIpAddress</h6>
+                            }
+
+                            @{
+                                var bytes = Convert.FromBase64String(ticket.Value);
+                                var deserializedTicket = TicketSerializer.Default.Deserialize(bytes);
+                            }
+
+                            @if (ticket.LastActive.HasValue)
+                            {
+                                DateTimeOffset currentDate = DateTimeOffset.Now;
+                                TimeSpan timeDifference = currentDate.Subtract(ticket.LastActive.Value);
+
+
+                                @if (timeDifference.TotalSeconds < 60)
+                                {
+                                    var sec = timeDifference.TotalSeconds <= 1 ? "second" : "seconds";
+                                    var str = $"Last active: {timeDifference.TotalSeconds:F2} {sec} ago";
+                                    <p class="card-text">
+                                        @str
+                                    </p>
+                                }
+                                else if (timeDifference.TotalMinutes < 60)
+                                {
+                                    var min = timeDifference.TotalMinutes <= 1 ? "minute" : "minutes";
+                                    var str = $"Last active: {timeDifference.TotalMinutes:F2} {min} ago";
+                                    <p class="card-text">
+                                        @str
+                                    </p>
+                                }
+                                else if (timeDifference.TotalHours < 24)
+                                {
+                                    var hrs = timeDifference.TotalHours <= 1 ? "hour" : "hours";
+                                    var str = $"Last active: {timeDifference.TotalHours:F2} {hrs} ago";
+                                    <p class="card-text">
+                                        @str
+                                    </p>
+                                }
+                                else
+                                {
+                                    <p class="card-text">
+                                        @ticket.LastActive.Value.ToString("yyyyy-MM-dd HH:mm");
+                                    </p>
+                                }
+                            }
+
+                            <form method="post" asp-page-handler="Delete" class="mt-2">
+                                <input type="hidden" name="id" value="@ticket.Key" />
+                                <button type="submit" class="card-link btn btn-danger">Delete</button>
+                            </form>
+
+                        </div>
+                    </div>
+                }
+            }
+
+        </ul>
+    }
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
