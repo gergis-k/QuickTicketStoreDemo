@@ -1,7 +1,4 @@
 using QuickTicketStoreDemo.Extensions;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using QuickTicketStoreDemo.Data;
 
 namespace QuickTicketStoreDemo;
 
