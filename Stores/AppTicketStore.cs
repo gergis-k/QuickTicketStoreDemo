@@ -52,6 +52,16 @@ public class AppTicketStore : ITicketStore
             var cache = scope.ServiceProvider.GetService<IConnectionMultiplexer>()?.GetDatabase()
                 ?? throw new InvalidOperationException(nameof(IConnectionMultiplexer));
 
+            var httpContextAccessor = scope.ServiceProvider.GetService<IHttpContextAccessor>();
+
+            string? deviceToken = string.Empty;
+            var checkCookie = httpContextAccessor?.HttpContext?.Request.Cookies.TryGetValue("AspNetDeviceToken", out deviceToken);
+
+            if (!checkCookie.HasValue || !checkCookie.Value)
+            {
+                deviceToken = SetDeviceTokenToCookies(httpContextAccessor);
+            }
+
             var ticketFromCache = await cache.StringGetAsync(key);
             if (ticketFromCache.HasValue)
             {
@@ -64,6 +74,7 @@ public class AppTicketStore : ITicketStore
                     deserializedTicket.Value = Convert.ToBase64String(bytes);
                     deserializedTicket.LastActive = DateTime.UtcNow;
                     deserializedTicket.Expires = ticket.Properties.ExpiresUtc;
+                    deserializedTicket.DeviceToken = deviceToken!;
 
                     var deserializedTicketJson = JsonSerializer.Serialize(deserializedTicket);
                     await cache.StringSetAsync(key, deserializedTicketJson, TimeSpan.FromDays(30));
@@ -81,6 +92,16 @@ public class AppTicketStore : ITicketStore
             var cache = scope.ServiceProvider.GetService<IConnectionMultiplexer>()?.GetDatabase()
                 ?? throw new InvalidOperationException(nameof(IConnectionMultiplexer));
 
+            var httpContextAccessor = scope.ServiceProvider.GetService<IHttpContextAccessor>();
+
+            string? deviceToken = string.Empty;
+            var checkCookie = httpContextAccessor?.HttpContext?.Request.Cookies.TryGetValue("AspNetDeviceToken", out deviceToken);
+
+            if (!checkCookie.HasValue || !checkCookie.Value)
+            {
+                deviceToken = SetDeviceTokenToCookies(httpContextAccessor);
+            }
+
             var ticketFromCache = await cache.StringGetAsync(key);
             if (ticketFromCache.HasValue)
             {
@@ -89,6 +110,7 @@ public class AppTicketStore : ITicketStore
                 if (deserializedTicket is not null)
                 {
                     deserializedTicket.LastActive = DateTime.UtcNow;
+                    deserializedTicket.DeviceToken = deviceToken!;
 
                     var deserializedTicketJson = JsonSerializer.Serialize(deserializedTicket);
                     await cache.StringSetAsync(key, deserializedTicketJson, TimeSpan.FromDays(30));
@@ -138,6 +160,17 @@ public class AppTicketStore : ITicketStore
 
         if (httpContext is not null)
         {
+            string? deviceToken = string.Empty;
+
+            var checkCookie = httpContextAccessor?.HttpContext?.Request.Cookies.TryGetValue("AspNetDeviceToken", out deviceToken);
+
+            if (!checkCookie.HasValue || !checkCookie.Value)
+            {
+                deviceToken = SetDeviceTokenToCookies(httpContextAccessor);
+            }
+
+            appAuthenticationTicket.DeviceToken = deviceToken!;
+
             var remoteIpAddress = httpContext.Connection.RemoteIpAddress?.ToString();
             if (!string.IsNullOrEmpty(remoteIpAddress))
             {
@@ -162,5 +195,19 @@ public class AppTicketStore : ITicketStore
         await cache.SetAddAsync($"UserTickets:{userId}", appAuthenticationTicket.Key);
 
         return appAuthenticationTicket.Key;
+    }
+
+    private string SetDeviceTokenToCookies(IHttpContextAccessor? httpContextAccessor)
+    {
+        var uniqueToken = $"{DateTime.UtcNow:fffffff}{Guid.NewGuid():N}";
+        httpContextAccessor?.HttpContext?.Response.Cookies.Append("AspNetDeviceToken", uniqueToken, new CookieOptions
+        {
+            HttpOnly = true,
+            SameSite = SameSiteMode.Strict,
+            IsEssential = true,
+            Expires = DateTimeOffset.UtcNow.AddYears(3)
+        });
+
+        return uniqueToken;
     }
 }

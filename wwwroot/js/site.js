@@ -12,4 +12,12 @@
         });
     });
 
+
+    $('#session-deletion-form').on('submit', function (event) {
+        var confirmDelete = confirm("Are you sure you want to destroy this session?");
+        if (!confirmDelete) {
+            event.preventDefault(); // Prevent form submission if user cancels
+        }
+    });
+
 });

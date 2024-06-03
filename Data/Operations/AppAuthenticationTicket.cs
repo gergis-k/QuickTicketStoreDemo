@@ -6,6 +6,8 @@ public class AppAuthenticationTicket
 
     public string UserId { get; set; } = default!;
 
+    public string DeviceToken { get; set; } = default!;
+
     public string Value { get; set; } = default!;
 
     public DateTimeOffset? LastActive { get; set; }
@@ -19,4 +21,9 @@ public class AppAuthenticationTicket
     public string? UserAgentFamily { get; set; }
 
     public string? UserAgentVersion { get; set; }
+
+    public bool IsCurrentSession(string deviceToken)
+    {
+        return DeviceToken.Equals(deviceToken);
+    }
 }

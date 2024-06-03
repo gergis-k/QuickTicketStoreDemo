@@ -1,4 +1,5 @@
 using QuickTicketStoreDemo.Extensions;
+using QuickTicketStoreDemo.Middlewares;
 
 namespace QuickTicketStoreDemo;
 
@@ -22,10 +23,11 @@ public class Program
         {
             cnfg.HttpOnly = true;
             cnfg.Secure = true;
-            cnfg.SameSite = SameSiteMode.Strict;
         });
 
         var app = builder.Build();
+
+        app.UseDeviceIdentifierMiddleware();
 
         await app.MigrateIdentityDatabase();
 

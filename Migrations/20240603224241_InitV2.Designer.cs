@@ -9,11 +9,11 @@ using QuickTicketStoreDemo.Data;
 
 #nullable disable
 
-namespace QuickTicketStoreDemo.Data.Migrations
+namespace QuickTicketStoreDemo.Migrations
 {
     [DbContext(typeof(AppIdentityDbContext))]
-    [Migration("20240602001341_Init")]
-    partial class Init
+    [Migration("20240603224241_InitV2")]
+    partial class InitV2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

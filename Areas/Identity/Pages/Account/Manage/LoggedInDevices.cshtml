@@ -43,11 +43,22 @@
                             }
 
                             @{
-                                var bytes = Convert.FromBase64String(ticket.Value);
-                                var deserializedTicket = TicketSerializer.Default.Deserialize(bytes);
+                                string? deviceToken;
+                                var checkCookie = HttpContext.Request.Cookies.TryGetValue("AspNetDeviceToken", out deviceToken);
                             }
 
-                            @if (ticket.LastActive.HasValue)
+                            @if (checkCookie && ticket.IsCurrentSession(deviceToken!))
+                            {
+                                <p class="card-text text-success">
+                                    Active session
+                                </p>
+
+                                <form id="session-deletion-form" method="post" asp-page-handler="Delete" class="mt-2">
+                                    <input type="hidden" name="id" value="@ticket.Key" />
+                                    <button type="submit" class="card-link btn btn-danger">Destroy</button>
+                                </form>
+                            }
+                            else if (ticket.LastActive.HasValue)
                             {
                                 DateTimeOffset currentDate = DateTimeOffset.Now;
                                 TimeSpan timeDifference = currentDate.Subtract(ticket.LastActive.Value);
@@ -83,12 +94,12 @@
                                         @ticket.LastActive.Value.ToString("yyyyy-MM-dd HH:mm");
                                     </p>
                                 }
-                            }
 
-                            <form method="post" asp-page-handler="Delete" class="mt-2">
-                                <input type="hidden" name="id" value="@ticket.Key" />
-                                <button type="submit" class="card-link btn btn-danger">Delete</button>
-                            </form>
+                                <form method="post" asp-page-handler="Delete" class="mt-2">
+                                    <input type="hidden" name="id" value="@ticket.Key" />
+                                    <button type="submit" class="card-link btn btn-danger">Destroy</button>
+                                </form>
+                            }
 
                         </div>
                     </div>

@@ -8,7 +8,7 @@ using QuickTicketStoreDemo.Data;
 
 #nullable disable
 
-namespace QuickTicketStoreDemo.Data.Migrations
+namespace QuickTicketStoreDemo.Migrations
 {
     [DbContext(typeof(AppIdentityDbContext))]
     partial class AppIdentityDbContextModelSnapshot : ModelSnapshot
