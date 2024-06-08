@@ -12,6 +12,6 @@ Here's a brief overview of the approach:
 
 - **Redis In-Memory Database**: Initially, I used Redis to store session data. You can check out the source code on GitHub.
 
-- **Live Demo**: Try out the live demo. Note that it's hosted on a free server without SSL, so please use HTTP instead of HTTPS. Due to limitations of the free hosting service, I've adapted the source code to store tickets in a SQL Server for this demo.
+- **Live Demo**: Try out the [live demo](http://quickticketstoredemo.runasp.net/). Note that it's hosted on a free server without SSL, so please use HTTP instead of HTTPS. Due to limitations of the free hosting service, I've adapted the source code to store tickets in a SQL Server for this demo.
 
 This project has been a rewarding experience, enhancing my understanding of session management and custom implementation in .NET Core. I'd love to hear your thoughts and any feedback you might have!
